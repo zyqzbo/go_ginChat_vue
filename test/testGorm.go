@@ -12,9 +12,10 @@ func main() {
 		panic("err:" + err.Error())
 	}
 	//db.AutoMigrate(&models.UserBasic{})
-	db.AutoMigrate(&models.Message{})
-	db.AutoMigrate(&models.Contact{})
-	db.AutoMigrate(&models.GroupBasic{})
+	//db.AutoMigrate(&models.Message{})
+	//db.AutoMigrate(&models.Contact{})
+	//db.AutoMigrate(&models.GroupBasic{})
+	db.AutoMigrate(&models.Community{})
 
 	//user := &models.UserBasic{}
 	//user.Name = "zyq"

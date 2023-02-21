@@ -240,12 +240,6 @@ func SendUserMsg(c *gin.Context) { // 发送消息
 func SearchFriends(c *gin.Context) { // 发送消息
 	id, _ := strconv.Atoi(c.Request.FormValue("userId")) // 获取参数欧转换成uint类型
 	users := models.SearchFriend(uint(id))
-
-	//c.JSON(200, gin.H{
-	//	"code":    0, // 0：成功 -1：失败
-	//	"data":    users,
-	//	"message": "查询好友列表成功",
-	//})
 	utils.RespOKList(c.Writer, users, len(users))
 }
 
@@ -253,6 +247,22 @@ func AddFriend(c *gin.Context) { // 添加好友
 	userId, _ := strconv.Atoi(c.Request.FormValue("userId"))     // 获取参数欧转换成uint类型
 	targetId, _ := strconv.Atoi(c.Request.FormValue("targetId")) // 获取参数欧转换成uint类型
 	code, msg := models.AddFriend(uint(userId), uint(targetId))
+
+	if code == 0 {
+		utils.RespOK(c.Writer, code, msg)
+	} else {
+		utils.RespFail(c.Writer, msg)
+	}
+
+}
+
+func CreateCommunity(c *gin.Context) {
+	ownerId, _ := strconv.Atoi(c.Request.FormValue("ownerId"))
+	name := c.Request.FormValue("name")
+	community := models.Community{}
+	community.OwnerId = uint(ownerId)
+	community.Name = name
+	code, msg := models.CreateCommunity(community)
 
 	if code == 0 {
 		utils.RespOK(c.Writer, code, msg)
