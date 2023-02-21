@@ -179,7 +179,7 @@ func dispatch(data []byte) {
 	fmt.Println("msg.Type:", msg.Type)
 	switch msg.Type {
 	case 1: // 私信
-		fmt.Println("dispatch data:", string(data))
+		//fmt.Println("dispatch data:", string(data))
 		sendMsg(msg.TargetId, data)
 		//case 2: // 群发
 		//	sendGroupMsg()
