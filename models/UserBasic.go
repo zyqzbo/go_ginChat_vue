@@ -85,3 +85,9 @@ func FindUserByNameAndPwd(name string, password string) UserBasic {
 	utils.DB.Model(&user).Where("id = ?", user.ID).Update("identity", temp) // 通过查询id去改变identity的值
 	return user
 }
+
+func FindById(id uint) UserBasic { //通过id来查找用户
+	user := UserBasic{}
+	utils.DB.Where("id = ?", id).First(&user)
+	return user
+}

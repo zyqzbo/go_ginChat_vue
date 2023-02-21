@@ -248,3 +248,16 @@ func SearchFriends(c *gin.Context) { // 发送消息
 	//})
 	utils.RespOKList(c.Writer, users, len(users))
 }
+
+func AddFriend(c *gin.Context) { // 添加好友
+	userId, _ := strconv.Atoi(c.Request.FormValue("userId"))     // 获取参数欧转换成uint类型
+	targetId, _ := strconv.Atoi(c.Request.FormValue("targetId")) // 获取参数欧转换成uint类型
+	code, msg := models.AddFriend(uint(userId), uint(targetId))
+
+	if code == 0 {
+		utils.RespOK(c.Writer, code, msg)
+	} else {
+		utils.RespFail(c.Writer, msg)
+	}
+
+}
