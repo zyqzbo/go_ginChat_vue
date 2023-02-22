@@ -281,3 +281,8 @@ func LoadCommunity(c *gin.Context) {
 		utils.RespFail(c.Writer, msg)
 	}
 }
+
+func init()  {
+	//rand.Seed(1) // 当给的是一个固定值时 随机数每次生成的都是一样的
+	rand.Seed(time.Now().UnixMicro()) // 伪随机，即能让每一次的随机数都是不一样的
+}

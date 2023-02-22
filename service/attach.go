@@ -36,3 +36,8 @@ func Upload(c *gin.Context) { // 图片上传
 	url := "./asset/upload/" + fileName
 	utils.RespOK(w, url, "发送图片成功")
 }
+
+func init()  {
+	//rand.Seed(1) // 当给的是一个固定值时 随机数每次生成的都是一样的
+	rand.Seed(time.Now().UnixMicro()) // 伪随机，即能让每一次的随机数都是不一样的
+}
