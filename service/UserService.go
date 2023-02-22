@@ -256,7 +256,7 @@ func AddFriend(c *gin.Context) { // 添加好友
 
 }
 
-func CreateCommunity(c *gin.Context) {
+func CreateCommunity(c *gin.Context) { // 创建群
 	ownerId, _ := strconv.Atoi(c.Request.FormValue("ownerId"))
 	name := c.Request.FormValue("name")
 	community := models.Community{}
@@ -270,4 +270,14 @@ func CreateCommunity(c *gin.Context) {
 		utils.RespFail(c.Writer, msg)
 	}
 
+}
+
+func LoadCommunity(c *gin.Context) {
+	ownerId, _ := strconv.Atoi(c.Request.FormValue("ownerId"))
+	data, msg := models.LoadCommunity(uint(ownerId))
+	if len(data) != 0 {
+		utils.RespList(c.Writer, 0, data, msg)
+	} else {
+		utils.RespFail(c.Writer, msg)
+	}
 }

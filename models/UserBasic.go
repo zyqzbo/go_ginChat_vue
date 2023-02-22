@@ -28,7 +28,7 @@ func (table *UserBasic) TableName() string { // 设置数据库表的名字
 	return "user_basic"
 }
 
-func GetUserList() []*UserBasic {
+func GetUserList() []*UserBasic { // 加载好友列表
 	data := make([]*UserBasic, 10)
 	utils.DB.Find(&data)
 	for _, v := range data {

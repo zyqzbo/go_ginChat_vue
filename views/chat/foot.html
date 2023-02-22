@@ -498,7 +498,7 @@
                 },
                 loadcommunitys: function () {
                     var that = this;
-                    post("contact/loadcommunity", { ownerId: userId() }, function (res) {
+                    post("contact/loadCommunity", { ownerId: userId() }, function (res) {
                         that.communitys = res.Rows || [];
                     })
                 },
