@@ -224,7 +224,7 @@ func MsgHandler(ws *websocket.Conn, c *gin.Context) {
 		return
 	}
 	fmt.Println("发送消息：", msg)
-	tm := time.Now().Format("2006-01-02 15:04:05")
+	tm := time.Now().Format("2006-01-02 15:04:05") // 时间返回的时候做格式化处理
 	m := fmt.Sprintf("[ws][%s]:%s", tm, msg)
 	ws.WriteMessage(1, []byte(m))
 	if err != nil {
@@ -237,7 +237,7 @@ func SendUserMsg(c *gin.Context) { // 发送消息
 	models.Chat(c.Writer, c.Request)
 }
 
-func SearchFriends(c *gin.Context) { // 发送消息
+func SearchFriends(c *gin.Context) { // 好友列表加载
 	id, _ := strconv.Atoi(c.Request.FormValue("userId")) // 获取参数欧转换成uint类型
 	users := models.SearchFriend(uint(id))
 	utils.RespOKList(c.Writer, users, len(users))
@@ -285,4 +285,16 @@ func LoadCommunity(c *gin.Context) {
 func init()  {
 	//rand.Seed(1) // 当给的是一个固定值时 随机数每次生成的都是一样的
 	rand.Seed(time.Now().UnixMicro()) // 伪随机，即能让每一次的随机数都是不一样的
+}
+
+
+
+func RedisMsg(c *gin.Context) {
+	userIdA, _ := strconv.Atoi(c.PostForm("userIdA"))
+	userIdB, _ := strconv.Atoi(c.PostForm("userIdB"))
+	start, _ := strconv.Atoi(c.PostForm("start"))
+	end, _ := strconv.Atoi(c.PostForm("end"))
+	isRev, _ := strconv.ParseBool(c.PostForm("isRev"))
+	res := models.RedisMsg(int64(userIdA), int64(userIdB), int64(start), int64(end), isRev)
+	utils.RespOKList(c.Writer, "ok", res)
 }

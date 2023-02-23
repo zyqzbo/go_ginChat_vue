@@ -15,9 +15,9 @@ import (
 
 var (
 	DB  *gorm.DB
-	rdb *redis.Client
+	Rdb *redis.Client
 )
-var ctx = context.Background()
+var ctx = context.Background()// 返回一个go的空上下文,作为redis的初始化时的参数使用
 
 func IntConfig() {
 	viper.SetConfigName("app")    // 扫描文件名
@@ -52,7 +52,7 @@ func InitMysSQL() {
 }
 
 func InitRedis() { // redis的连接
-	rdb = redis.NewClient(&redis.Options{
+	Rdb = redis.NewClient(&redis.Options{
 		Addr:         viper.GetString("redis.addr"),
 		Password:     viper.GetString("redis.password"),
 		DB:           viper.GetInt("redis.DB"),
@@ -60,12 +60,12 @@ func InitRedis() { // redis的连接
 		MinIdleConns: viper.GetInt("redis.minIdleConn"),
 	})
 	//result, err := Red.Ping().Result()
-	err := rdb.Set(ctx, "key", "value", 0).Err()
+	err := Rdb.Set(ctx, "key", "value", 0).Err()
 	if err != nil {
 		panic(err)
 	}
 
-	val, err := rdb.Get(ctx, "key").Result()
+	val, err := Rdb.Get(ctx, "key").Result()
 	if err != nil {
 		panic(err)
 	}
@@ -80,7 +80,7 @@ const (
 func Publish(ctx context.Context, channel string, msg string) error {
 	var err error
 	fmt.Println("Publish", msg)
-	err = rdb.Publish(ctx, channel, msg).Err()
+	err = Rdb.Publish(ctx, channel, msg).Err()
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -91,7 +91,7 @@ func Publish(ctx context.Context, channel string, msg string) error {
 
 // Subscribe 订阅Redis 消息
 func Subscribe(ctx context.Context, channel string) (string, error) {
-	sub := rdb.Subscribe(ctx, channel)
+	sub := Rdb.Subscribe(ctx, channel)
 	fmt.Println("Subscribe ctx", ctx)
 	msg, err := sub.ReceiveMessage(ctx)
 	if err != nil {

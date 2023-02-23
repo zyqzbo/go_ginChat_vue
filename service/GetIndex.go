@@ -36,6 +36,7 @@ func ToRegister(c *gin.Context) {
 }
 
 func ToChat(c *gin.Context) {
+	// 扫描前端文件
 	ind, err := template.ParseFiles("views/chat/index.html",
 		"views/chat/head.html",
 		"views/chat/tabmenu.html",

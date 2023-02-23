@@ -28,12 +28,9 @@ func (table *UserBasic) TableName() string { // 设置数据库表的名字
 	return "user_basic"
 }
 
-func GetUserList() []*UserBasic { // 加载好友列表
+func GetUserList() []*UserBasic { // 加载所有用户 返回一个数组类型的集合体相当于[{},{},{}]
 	data := make([]*UserBasic, 10)
 	utils.DB.Find(&data)
-	for _, v := range data {
-		fmt.Println(v)
-	}
 	return data
 }
 

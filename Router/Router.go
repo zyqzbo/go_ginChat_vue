@@ -27,7 +27,7 @@ func GetRouter() *gin.Engine {
 
 	// 用户模块
 	r.POST("/user/createUser", service.CreateUser)
-	r.POST("user/getUserList", service.GetUserList)
+	r.POST("/user/getUserList", service.GetUserList)
 	r.POST("/user/deleteUser", service.DeleteUser)
 	r.POST("/user/updateUser", service.UpdateUser)
 	r.POST("/user/login", service.Login)
@@ -43,6 +43,8 @@ func GetRouter() *gin.Engine {
 	// 创建群
 	r.POST("/contact/createCommunity", service.CreateCommunity)
 	// 加载群列表
-	r.POST("/contact/loadCommunity", service.LoadCommunity)
+	r.POST("/contact/loadCommunity", service.	LoadCommunity)
+	// 加载redis缓存
+	r.POST("/user/redisMsg", service.RedisMsg)
 	return r
 }

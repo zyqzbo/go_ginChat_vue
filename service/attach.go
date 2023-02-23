@@ -24,7 +24,7 @@ func Upload(c *gin.Context) { // 图片上传
 	if len(tem) > 1 {
 		suffix = "." + tem[len(tem)-1] // 相当于截取的是文件后缀的格式
 	}
-	fileName := fmt.Sprintf("%d%04d%s", time.Now().Unix(), rand.Int31(), suffix) // 当前时间 + 四位数的随机数 + 截取的文件后缀
+	fileName := fmt.Sprintf("%d%04d%s", time.Now().Unix(), rand.Int31()%10000, suffix) // 当前时间 + 四位数的随机数 + 截取的文件后缀
 	dstFile, err := os.Create("./asset/upload/" + fileName)
 	if err != nil {
 		utils.RespFail(w, err.Error())

@@ -11,7 +11,7 @@ import (
 const timeFormat = "2006-01-02 15:04:05"
 const timezone = "Asia/Shanghai"
 
-type Time time.Time
+type Time time.Time // 声明一个时间类型的Time
 
 func (t Time) MarshalJSON() ([]byte, error) {
 	b := make([]byte, 0, len(timeFormat)+2)
