@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/go-redis/redis/v8"
 	"github.com/gorilla/websocket"
 	"github.com/spf13/viper"
 	"goChat/utils"
@@ -18,15 +19,17 @@ import (
 
 type Message struct { // 消息字段
 	gorm.Model
-	FormId   int64  // 发送者
-	TargetId int64  // 接受者
-	Type     int    // 发送类型 群聊 广播
-	Media    int    // 消息类型 表情包 文字 图片 音频
-	Content  string // 消息内容
-	Pic      string
-	Url      string
-	Desc     string
-	Amount   int // 其他数字统计
+	UserId     int64  // 发送者x
+	TargetId   int64  // 接受者
+	Type       int    // 发送类型 群聊 广播
+	Media      int    // 消息类型 表情包 文字 图片 音频
+	Content    string // 消息内容
+	CreateTime uint64 // 创建时间
+	ReadTime   uint64 // 读取时间
+	Pic        string
+	Url        string
+	Desc       string
+	Amount     int // 其他数字统计
 }
 
 func (table *Message) TableName() string { // 设置数据库表的名字
@@ -184,6 +187,7 @@ func udpRecvProc() {
 // 后端调度逻辑处理
 func dispatch(data []byte) {
 	msg := Message{} // 实例化message结构体
+	msg.CreateTime = uint64(time.Now().Unix())
 	// 把消息内容data 是json字符串类型转为结构体类型（键值对） （json字符串[转]结构体）方便下面获取msg.type的值
 	err := json.Unmarshal(data, &msg)
 	if err != nil {
@@ -193,11 +197,11 @@ func dispatch(data []byte) {
 	fmt.Println("msg.Type:", msg.Type)
 	switch msg.Type {
 	case 1: // 私信
-		//fmt.Println("dispatch data:", string(data))
+		fmt.Println("dispatch data:", string(data))
 		sendMsg(msg.TargetId, data) // 传入消息类型、消息内容
-		//err := utils.Publish(ctx, utils.PublishKey, "xxx")
-		//case 2: // 群发
-		//	sendGroupMsg()
+	//err := utils.Publish(ctx, utils.PublishKey, "xxx")
+	case 2: // 群发
+		//sendGroupMsg(msg.TargetId, data) // 发送的群ID，消息内容
 		//case 3: // 广播
 		//	sendAllMsg()
 		//case 4:
@@ -207,19 +211,63 @@ func dispatch(data []byte) {
 
 // 发送消息
 func sendMsg(userId int64, msg []byte) {
-	fmt.Println("sendMsg >>> userID:", userId, "msg", string(msg))
 	rwLocker.RLock()
 	node, ok := clientMap[userId] // 通过userId来绑定node是谁发的
 	rwLocker.RUnlock()            // 解锁
-	if ok {
-		node.DataQueue <- msg // 发送内容
+	jsonMsg := Message{}
+	json.Unmarshal(msg, &jsonMsg)
+	ctx := context.Background()
+	targetIdStr := strconv.Itoa(int(userId))
+	userIdStr := strconv.Itoa(int(jsonMsg.UserId))
+	jsonMsg.CreateTime = uint64(time.Now().Unix())
+	r, err := utils.Rdb.Get(ctx, "online_"+userIdStr).Result()
+	if err != nil {
+		fmt.Println(err) // 没找到
 	}
+	if r != "" {
+		if ok {
+			fmt.Println("sendMsg >>> userID:", userId, "msg", string(msg))
+			node.DataQueue <- msg
+		}
+	}
+	var key string
+	if userId > jsonMsg.UserId {
+		key = "msg_" + userIdStr + "_" + targetIdStr
+	} else {
+		key = "msg_" + targetIdStr + "_" + userIdStr
+	}
+	res, err := utils.Rdb.ZRevRange(ctx, key, 0, -1).Result()
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println("res:", res)
+	score := float64(cap(res)) + 1                                       // 按分数加1（时间去排序）
+	data, err := utils.Rdb.ZAdd(ctx, key, &redis.Z{score, msg}).Result() // jsonMsg
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(data)
 }
 
 var ctx context.Context
 
 func init() {
 	ctx = context.Background()
+}
+
+func sendGroupMsg(targetId int64, msg []byte) {
+	fmt.Println("开始群发消息")
+	//userIds := SearchUserByGroupId(uint(targetId))
+	//for i := 0; i < len(userIds); i++ {
+	//	// 排除自己的
+	//	if targetId != int64(userIds[i]) {
+	//		sendMsg(int64(userIds[i]), msg)
+	//	}
+	//}
+}
+
+func SearchUserByGroupId(u uint) interface{} {
+	return nil
 }
 
 // JoinGroup 加群
@@ -262,8 +310,11 @@ func RedisMsg(userIdA int64, userIdB int64, start int64, end int64, isRev bool) 
 		key = "msg_" + userIdStr + "_" + targetIdStr
 	}
 	//key = "msg_" + userIdStr + "_" + targetIdStr
-	//rels, err := utils.Red.ZRevRange(ctx, key, 0, 10).Result()  //根据score倒叙
+	//rels, err := utils.Rdb.ZRevRange(ctx, key, 0, -1).Result() //根据score倒叙
 
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
 	var rels []string
 	var err error
 	if isRev {
