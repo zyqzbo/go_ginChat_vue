@@ -15,7 +15,7 @@ func GetRouter() *gin.Engine {
 
 	// 静态资源
 	r.Static("asset", "asset")
-	r.LoadHTMLGlob("views/**/*")
+	r.LoadHTMLGlob("views/**/*") // gin框架的LoadHTMLGlob去扫描html网友模版
 
 	// 首页
 	r.GET("/", service.GetIndex)
@@ -43,7 +43,9 @@ func GetRouter() *gin.Engine {
 	// 创建群
 	r.POST("/contact/createCommunity", service.CreateCommunity)
 	// 加载群列表
-	r.POST("/contact/loadCommunity", service.	LoadCommunity)
+	r.POST("/contact/loadCommunity", service.LoadCommunity)
+	// 加群
+	r.POST("contact/joinGroup", service.JoinGroup)
 	// 加载redis缓存
 	r.POST("/user/redisMsg", service.RedisMsg)
 	return r

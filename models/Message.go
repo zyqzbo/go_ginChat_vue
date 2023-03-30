@@ -74,7 +74,7 @@ func Chat(writer http.ResponseWriter, request *http.Request) {
 	// 2、获取连接Conn
 	node := &Node{
 		Conn:      conn,
-		Addr:          conn.RemoteAddr().String(), //客户端地址
+		Addr:      conn.RemoteAddr().String(), //客户端地址
 		DataQueue: make(chan []byte, 50),
 		GroupSets: set.New(set.ThreadSafe),
 	}
@@ -210,7 +210,7 @@ func sendMsg(userId int64, msg []byte) {
 	fmt.Println("sendMsg >>> userID:", userId, "msg", string(msg))
 	rwLocker.RLock()
 	node, ok := clientMap[userId] // 通过userId来绑定node是谁发的
-	rwLocker.RUnlock() // 解锁
+	rwLocker.RUnlock()            // 解锁
 	if ok {
 		node.DataQueue <- msg // 发送内容
 	}
@@ -220,6 +220,28 @@ var ctx context.Context
 
 func init() {
 	ctx = context.Background()
+}
+
+// JoinGroup 加群
+func JoinGroup(userId uint, comId string) (int, string) {
+	contact := Contact{}
+	contact.OwnerId = userId
+	//contact.TargetId = comId
+	contact.Type = 2
+	community := Community{}
+
+	utils.DB.Where("id=? or name=?", comId, comId).Find(&community)
+	if community.Name == "" {
+		return -1, "没找到群"
+	}
+	utils.DB.Where("owner_id=? and target_id=? and type = 2", userId, comId).Find(&contact)
+	if !contact.CreatedAt.IsZero() {
+		return -1, "加过此群"
+	} else {
+		contact.TargetId = community.ID
+		utils.DB.Create(&contact)
+		return 0, "加群成功!"
+	}
 }
 
 //获取缓存里面的消息

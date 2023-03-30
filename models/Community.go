@@ -29,8 +29,16 @@ func CreateCommunity(community Community) (int, string) {
 }
 
 func LoadCommunity(ownerId uint) ([]*Community, string) { //查询群列表，返回一个集合，和msg
+	// 看不明白
+	contacts := make([]Contact, 0)
+	objIds := make([]uint64, 0)
+	utils.DB.Where("owner_id = ? and type=2", ownerId).Find(&contacts)
+	for _, v := range contacts {
+		objIds = append(objIds, uint64(v.TargetId))
+	}
+
 	data := make([]*Community, 10)
-	utils.DB.Where("owner_id = ?", ownerId).Find(&data)
+	utils.DB.Where("id in ?", objIds).Find(&data)
 	for _, v := range data {
 		fmt.Println(v)
 	}

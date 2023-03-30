@@ -51,8 +51,8 @@ func CreateUser(c *gin.Context) {
 	user.Phone = c.Query("phone")
 	user.Email = c.Query("email")
 	salt := fmt.Sprintf("%06d", rand.Int31()) // 生成随机数
-	//data := models.FindUserByName(user.Name)
-	//fmt.Println(user.Name, "<<<<<<<<<", password, repassword)
+	data := models.FindUserByName(user.Name)
+	fmt.Println(user.Name, "<<<<<<<<<", password, repassword)
 	//data = models.FindUserByPhone(user.Phone)
 	//data = models.FindUserByEmail(user.Email)
 	//fmt.Println("data.Nam:", data.Name)
@@ -62,6 +62,13 @@ func CreateUser(c *gin.Context) {
 			"code":    0, // 0：成功 -1：失败
 			"data":    user,
 			"message": "用户已注册",
+		})
+		return
+	}
+	if data.Name != "" {
+		c.JSON(-1, gin.H{
+			"message": "用户已注册！",
+			"data":    user,
 		})
 		return
 	}
@@ -272,6 +279,7 @@ func CreateCommunity(c *gin.Context) { // 创建群
 
 }
 
+// LoadCommunity 加载群列表
 func LoadCommunity(c *gin.Context) {
 	ownerId, _ := strconv.Atoi(c.Request.FormValue("ownerId"))
 	data, msg := models.LoadCommunity(uint(ownerId))
@@ -282,13 +290,22 @@ func LoadCommunity(c *gin.Context) {
 	}
 }
 
-func init()  {
+func init() {
 	//rand.Seed(1) // 当给的是一个固定值时 随机数每次生成的都是一样的
 	rand.Seed(time.Now().UnixMicro()) // 伪随机，即能让每一次的随机数都是不一样的
 }
 
-
-
+// JoinGroup 加群
+func JoinGroup(c *gin.Context) {
+	userId, _ := strconv.Atoi(c.Request.FormValue("userId"))
+	comId := c.Request.FormValue("comId")
+	data, msg := models.JoinGroup(uint(userId), comId)
+	if data == 0 {
+		utils.RespOK(c.Writer, data, msg)
+	} else {
+		utils.RespFail(c.Writer, msg)
+	}
+}
 func RedisMsg(c *gin.Context) {
 	userIdA, _ := strconv.Atoi(c.PostForm("userIdA"))
 	userIdB, _ := strconv.Atoi(c.PostForm("userIdB"))
