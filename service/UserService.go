@@ -139,6 +139,7 @@ func UpdateUser(c *gin.Context) {
 	user.Name = c.PostForm("name")
 	user.Password = c.PostForm("password")
 	user.Phone = c.PostForm("phone")
+	user.Avatar = c.PostForm("icon")
 	user.Email = c.PostForm("email")
 
 	_, err := govalidator.ValidateStruct(user) // govalidator 的结构体验证方法
@@ -266,9 +267,13 @@ func AddFriend(c *gin.Context) { // 添加好友
 func CreateCommunity(c *gin.Context) { // 创建群
 	ownerId, _ := strconv.Atoi(c.Request.FormValue("ownerId"))
 	name := c.Request.FormValue("name")
+	icon := c.Request.FormValue("icon")
+	desc := c.Request.FormValue("desc")
 	community := models.Community{}
 	community.OwnerId = uint(ownerId)
 	community.Name = name
+	community.Img = icon
+	community.Desc = desc
 	code, msg := models.CreateCommunity(community)
 
 	if code == 0 {

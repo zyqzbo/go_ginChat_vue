@@ -13,6 +13,7 @@ type UserBasic struct {
 	Password      string
 	Phone         string `valid:"matches(^1[3-9]{1}\\d{9}$)"`
 	Email         string `valid:"email"`
+	Avatar        string // 头像
 	Identity      string // 唯一表识
 	ClientIp      string // 设备id
 	ClientPort    string // 客户端口
@@ -48,6 +49,7 @@ func UpdateUser(user UserBasic) *gorm.DB { // 修改用户
 		Password: user.Password,
 		Phone:    user.Phone,
 		Email:    user.Email,
+		Avatar:   user.Avatar,
 	})
 }
 

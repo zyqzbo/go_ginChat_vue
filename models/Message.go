@@ -318,9 +318,9 @@ func RedisMsg(userIdA int64, userIdB int64, start int64, end int64, isRev bool) 
 	var rels []string
 	var err error
 	if isRev {
-		rels, err = utils.Rdb.ZRange(ctx, key, start, end).Result()
+		rels, err = utils.Rdb.ZRange(ctx, key, start, end).Result() // 升序
 	} else {
-		rels, err = utils.Rdb.ZRevRange(ctx, key, start, end).Result()
+		rels, err = utils.Rdb.ZRevRange(ctx, key, start, end).Result() // 倒序
 	}
 	if err != nil {
 		fmt.Println(err) //没有找到
